@@ -1,0 +1,91 @@
+CLASS HistogramApp:
+    INITIALIZE(traffic_data, date)
+        STORE traffic_data
+        STORE date
+        INITIALIZE tkinter root window
+        INITIALIZE canvas AS None
+
+    METHOD setup_window():
+        FORMAT date INTO formatted_date
+        SET root window title USING formatted_date
+        INITIALIZE canvas WITH specified width, height, and background color
+        ADD canvas TO root window
+
+    METHOD draw_histogram():
+        CALCULATE max_frequency FROM traffic_data
+        DEFINE bar_width, group_spacing, x_offset, y_offset, y_scale
+        DRAW x-axis and y-axis
+
+        FOR each hour FROM 0 TO 23:
+            CALCULATE x position
+            DRAW hour label and grid lines
+
+        DEFINE colors FOR each junction
+        FOR each hour FROM 0 TO 23:
+            CALCULATE x_group_start
+            FOR each junction and its data:
+                CALCULATE bar dimensions
+                DRAW bar ON canvas
+                IF count > 0:
+                    DISPLAY count above the bar
+
+        DRAW x-axis label
+        DRAW legend FOR each junction
+
+    METHOD run():
+        CALL setup_window()
+        CALL draw_histogram()
+        START tkinter main loop
+
+CLASS MultiCSVProcessor:
+    INITIALIZE():
+        INITIALIZE outcomes_by_date AS empty dictionary
+        INITIALIZE available_dates AS empty list
+        INITIALIZE current_data AS None
+        DEFINE file_paths FOR all CSV files
+
+    METHOD load_csv_file(file_paths):
+        CALL process_csv_data(file_paths) AND STORE results in outcomes_by_date AND available_dates
+
+    METHOD clear_previous_data():
+        SET current_data TO None
+
+    METHOD handle_user_interaction():
+        WHILE True:
+            GET user_date USING validate_date_input()
+            
+            IF user_date NOT IN available_dates:
+                DISPLAY "No data available for the selected date."
+                CONTINUE
+
+            SET current_data USING outcomes_by_date[user_date]
+            DISPLAY outcomes USING display_outcomes()
+            SAVE results TO file USING save_results_to_file()
+
+            INITIALIZE HistogramApp WITH current_data AND user_date
+            CALL run() ON HistogramApp
+
+            WHILE True:
+                ASK user IF they want to process another file (Y/N)
+                IF choice IS valid:
+                    BREAK
+                DISPLAY "Enter Y or N"
+
+            IF choice IS 'n':
+                DISPLAY "End of run"
+                RETURN False
+            ELSE:
+                CALL clear_previous_data()
+                RETURN True
+
+    METHOD process_files():
+        CALL load_csv_file(file_paths)
+
+        WHILE True:
+            CONTINUE_PROCESSING = CALL handle_user_interaction()
+            IF NOT CONTINUE_PROCESSING:
+                BREAK
+
+MAIN:
+    INITIALIZE MultiCSVProcessor INSTANCE
+    CALL process_files() ON INSTANCE
