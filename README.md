@@ -23,7 +23,7 @@ This project is a Python-based application that validates user-input dates, proc
 
 ---
 
-## 🛠️ Technologies Used
+##  Technologies Used
 
 - Python  
 - Tkinter (for GUI)  
